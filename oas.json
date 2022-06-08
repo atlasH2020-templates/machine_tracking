@@ -1,0 +1,1277 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "UC#1 - Machine Tracking",
+    "description": "This API describes services enabling client applications to create and maintain subscriptions for retrieving object data (e.g. position, speed, ...).",
+    "version": "0.1.1"
+  },
+  "servers": [
+    {
+      "url": "https://{stage}.api-provider.com/",
+      "description": "The API servers",
+      "variables": {
+        "stage": {
+          "enum": [
+            "api",
+            "api-int"
+          ],
+          "default": "api",
+          "description": "The API system"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/v1/objectscopes": {
+      "get": {
+        "summary": "Get a full list of available object scopes for the given authentication context.",
+        "operationId": "getObjectScopes",
+        "tags": [
+          "ObjectScopes"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopes_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/objectscopes/{objectScopeId}": {
+      "get": {
+        "summary": "Get information about a specific object scope by ID.",
+        "operationId": "getObjectScopesById",
+        "tags": [
+          "ObjectScopes"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopesById_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/objectscopes/{objectScopeId}/subscriptions": {
+      "get": {
+        "summary": "Get a list of subscriptions for the object scope",
+        "operationId": "getObjectScopesByIdSubscriptions",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopesByIdSubscriptions_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a new subscription in the object scope",
+        "operationId": "postObjectScopesByIdSubscriptions",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/postObjectScopesByIdSubscriptions"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/postObjectScopesByIdSubscriptions_HTTP201"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "callbacks": {
+          "ConsumerMeasurementReceiver": {
+            "callbackURI": {
+              "put": {
+                "summary": "A generated rest endpoint able to receive the measurement data of an active subscription",
+                "description":"* The minimum interval for equipment measurements included in an equipment data package is 15s \n* The interval for equipment measurements might vary over time depending on the provider side equipment capabilities. \n* Measurements might be delivered either o as �full frames� including all supported required / optional attributes of the equipment, even if not changed o as �delta frames� including all required attributes and the supported changed optional attributes. In this case the provider side should deliver periodically a synchronization frame (�full frame�) to the consumer \n* Measurement values provided with units in metric format * Used timestamps conform to ISO 8601 Standard normalized to UTC 0 \n* Used measurement attribute names will be derived from ISO 11783-11 \n* Required measurement parameters are provided a single key / value pair where the key represents the parameter name. They are always included in a measurement, even in case of delta logging. \n* Optional attributes are included in an array, where each optional parameter is included by a key / value pair for the parameter value and a key / value pair vor the parameter value. Optional parameters can be left out in case that they are not available or have not been changed since last measurement, i.e. in case of delta logging. The provider side communication device of the equipment will drive which attributes are available. \n* The provider side shall deliver a single data stream per equipment to the consumer, independent from the capabilities of the provider side system to handle multiple telemetric devices per equipment. The provider may decide to focus on highest quality of data source to be used in the stream.\n
+<table border=1>
+  <tr>
+    <th align=left>Parameter</th>
+    <th align=left>Description</th>
+    <th align=left>Unit</th>
+    <th align=left>Opional/Mandatory</th>
+    <th align=left>Type</th>
+  </tr>
+  <tr>
+    <td>gpsAltitude</td>
+    <td>WGS84 based GPS Altitude as ellipsoidal height</td>
+    <td>meter</td>
+    <td>o</td>
+    <td>String</td>
+  </tr>
+  <tr>
+    <td>fuelTankLevel</td>
+    <td>The percentage of fuel left in the equipment's tank.</td>
+    <td>percentage</td>
+    <td>o</td>
+    <td>Number</td>
+  </tr>
+  <tr>
+    <td>engineState</td>
+    <td>The state of the equipment�s engine</td>
+    <td></td>
+    <td>o</td>
+    <td>String</td>
+  </tr>
+  <tr>
+    <td>speed</td>
+    <td>The last known speed of the equipment</td>
+    <td>meter per second</td>
+    <td>o</td>
+    <td>Number</td>
+  </tr>
+  <tr>
+    <td>heading</td>
+    <td>The compass direction of the equipment</td>
+    <td>compass degree</td>
+    <td>o</td>
+    <td>Number</td>
+  </tr>
+</table>
+",
+                "operationId": "putMeasurements",
+                "tags": [
+                  "Measurements"
+                ],
+                "parameters": [
+                  {
+                    "$ref": "#/components/parameters/authorization"
+                  }
+                ],
+                "requestBody": {
+                  "$ref": "#/components/requestBodies/putMeasurements"
+                },
+                "responses": {
+                  "204": {
+                    "$ref": "#/components/responses/HTTP204"
+                  },
+                  "400": {
+                    "$ref": "#/components/responses/HTTP400"
+                  },
+                  "401": {
+                    "$ref": "#/components/responses/HTTP401"
+                  },
+                  "404": {
+                    "$ref": "#/components/responses/HTTP404"
+                  },
+                  "410": {
+                    "$ref": "#/components/responses/HTTP410"
+                  },
+                  "429": {
+                    "$ref": "#/components/responses/HTTP429"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/objectscopes/{objectScopeId}/subscriptions/{subscriptionId}": {
+      "get": {
+        "summary": "Get details of a specific subscription",
+        "operationId": "getObjectScopesByIdSubscriptionsById",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/subscriptionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopesByIdSubscriptionsById_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "410": {
+            "$ref": "#/components/responses/HTTP410"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "summary": "Replace a subscription in the object scope",
+        "operationId": "putObjectScopesByIdSubscriptionsById",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/putObjectScopesByIdSubscriptionsById"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/subscriptionId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/HTTP204"
+          },
+          "304": {
+            "$ref": "#/components/responses/HTTP304"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "410": {
+            "$ref": "#/components/responses/HTTP410"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update a subscription in the object scope",
+        "operationId": "patchObjectScopesByIdSubscriptionsById",
+        "tags": [
+          "Subscriptions"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/patchObjectScopesByIdSubscriptionsById"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/subscriptionId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/HTTP204"
+          },
+          "304": {
+            "$ref": "#/components/responses/HTTP304"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "410": {
+            "$ref": "#/components/responses/HTTP410"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a subscription from the object scope",
+        "operationId": "deleteObjectScopesByIdSubscriptionsById",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/subscriptionId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/HTTP204"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "410": {
+            "$ref": "#/components/responses/HTTP410"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/objectscopes/{objectScopeId}/objects": {
+      "get": {
+        "summary": "Get a list of objects for the given object scope",
+        "operationId": "getObjectScopesByIdObject",
+        "tags": [
+          "Objects"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopesByIdObject_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/objectscopes/{objectScopeId}/objects/{objectId}": {
+      "get": {
+        "summary": "Get a specific single object",
+        "operationId": "getObjectScopesByIdObjectById",
+        "tags": [
+          "Objects"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/objectId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopesByIdObjectById_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    },
+    "/v1/objectscopes/{objectScopeId}/objects/{objectId}/measurements": {
+      "get": {
+        "summary": "Get measurement data of aa specific single object for a given time period",
+        "operationId": "getObjectScopesByIdObjectByIdMeasurements",
+        "tags": [
+          "Measurement data"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/objectScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/objectId"
+          },
+          {
+            "$ref": "#/components/parameters/dateStart"
+          },
+          {
+            "$ref": "#/components/parameters/dateEnd"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getObjectScopesByIdObjectByIdMeasurements_HTTP200"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "OAuth2AuthorizationCodeFlow": [
+              "any:resource"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2AuthorizationCodeFlow": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://api.api-provider.com/authorization/auth",
+            "tokenUrl": "https://api.api-provider.com/authorization/token",
+            "scopes": {
+              "any:resource": "Grants access to the end customer related resources."
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "getObjectScopes_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/objectScopeListItem"
+              }
+            }
+          }
+        }
+      },
+      "getObjectScopesById_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/objectScope"
+            }
+          }
+        }
+      },
+      "getObjectScopesByIdSubscriptions_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/subscription"
+              }
+            }
+          }
+        }
+      },
+      "postObjectScopesByIdSubscriptions_HTTP201": {
+        "description": "Created",
+        "content": {
+          
+        },
+        "headers": {
+          "Location": {
+            "description": "The URI of the newly created resource.",
+            "schema": {
+              "$ref": "#/components/schemas/link"
+            }
+          }
+        }
+      },
+      "getObjectScopesByIdSubscriptionsById_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/subscription"
+            }
+          }
+        }
+      },
+      "getObjectScopesByIdObject_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/objectListItem"
+              }
+            }
+          }
+        }
+      },
+      "getObjectScopesByIdObjectById_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/object"
+            }
+          }
+        }
+      },
+      "getObjectScopesByIdObjectByIdMeasurements_HTTP200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/measurement"
+              }
+            }
+          }
+        }
+      },
+      "HTTP204": {
+        "description": "No content",
+        "content": {
+          
+        }
+      },
+      "HTTP304": {
+        "description": "Not modified",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPErrors"
+            }
+          }
+        }
+      },
+      "HTTP400": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPErrors"
+            }
+          }
+        }
+      },
+      "HTTP401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPErrors"
+            }
+          }
+        }
+      },
+      "HTTP404": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPErrors"
+            }
+          }
+        }
+      },
+      "HTTP410": {
+        "description": "Gone",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPErrors"
+            }
+          }
+        }
+      },
+      "HTTP429": {
+        "description": "Too many requests",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HTTPErrors"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "dateStart": {
+        "description": "The point in time from which historical data shall be submitted",
+        "type": "string",
+        "format": "date-time",
+        "example": "2014-01-15T17:51:34.10Z"
+      },
+      "dateEnd": {
+        "description": "The point in time up to which historical data shall be submitted",
+        "type": "string",
+        "format": "date-time",
+        "example": "2014-01-15T17:51:34.10Z"
+      },
+      "objectScopeId": {
+        "description": "The ID which references the object scope at the data provider. The consuming side may not be able to store the received value at its full length and is allowed to truncate it.",
+        "type": "string",
+        "maxLength": 256
+      },
+      "objectScopeName": {
+        "description": "The name of a object scope at the data provider. The consuming side may not be able to store the received value at its full length and is allowed to truncate it.",
+        "type": "string",
+        "example": "My object scope",
+        "maxLength": 256
+      },
+      "subscriptionId": {
+        "description": "The ID which references the created subscription at the data provider.",
+        "type": "string",
+        "format": "uuid"
+      },
+      "callbackURI": {
+        "description": "A conform URI",
+        "type": "string",
+        "example": "https://api.api-server.com"
+      },
+      "subscriptionStatus": {
+        "description": "A status indicator for a subscription",
+        "type": "string",
+        "enum": [
+          "active",
+          "suspended"
+        ]
+      },
+      "objectId": {
+        "type": "string",
+        "maxLength": 256,
+        "description": "The consuming side may not be able to store the received value at its full length and is allowed to truncate it."
+      },
+      "objectName": {
+        "description": "The name of a object. The consuming side may not be able to store the received value at its full length and is allowed to truncate it.",
+        "type": "string",
+        "example": "My object",
+        "maxLength": 256
+      },
+      "authorization": {
+        "type": "string",
+        "maxLength": 4096,
+        "description": "Complete content the provider has to copy into the authorization request header of the Object data callback to the consumer, i.e. �Bearer <token>�",
+        "example": "Bearer acJhbGciRaJSEzI1NiItInR5cEIgOiAiSl..."
+      },
+      "correlationId": {
+        "type": "string"
+      },
+      "messageCounter": {
+            "type": "integer",
+            "format": "int64"
+          },
+      "pin": {
+        "description": "The identification of the object in ISO 10261. The consuming side may not be able to store the received value at its full length and is allowed to truncate it.",
+        "type": "string",
+        "example": "..."
+      },
+      "createdTimestamp": {
+        "description": "The point in UTCZ when the objects scope was created",
+        "type": "string",
+        "format": "date-time",
+        "example": "2014-01-15T17:51:34.10Z"
+      },
+      "lastUpdatedTimestamp": {
+        "description": "The point in UTCZ when the object scope was updated the last time",
+        "type": "string",
+        "format": "date-time",
+        "example": "2014-01-15T17:51:34.10Z"
+      },
+      "lastUpdatedBy": {
+        "description": "The CLientID (oAuth2) who has updated the resource at last.",
+        "type": "string",
+        "example": "TheClientsId"
+      },
+      "measurement": {
+        "description": "A value set of measurement data in relation to a GPS position and time",
+        "type": "object",
+        "required": [
+          "timestamp",
+          "gpsLatitude",
+          "gpsLongitude",
+          "values"
+        ],
+        "properties": {
+          "timestamp": {
+            "description": "The point in UTCZ when the dataset was recorded on the object",
+            "type": "string",
+            "format": "date-time",
+            "example": "2014-01-15T17:51:34.10Z"
+          },
+          "gpsLatitude": {
+            "description": "Latitude of the GPS point",
+            "type": "number"
+          },
+          "gpsLongitude": {
+            "description": "Longitude of the GPS point",
+            "type": "number"
+          },
+          "values": {
+            "type": "array",
+            "description": "The possible optional parameters are:",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "example": "The identifier of the measurement value"
+                },
+                "value": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "integer"},
+                    {"type": "number"}
+                  ],
+                  "example": "The value itself"
+                }
+              }
+            }
+          }
+        }
+      },
+      "HTTPErrors": {
+        "description": "Every error is caught and handled respectively.",
+        "type": "object",
+        "required": [
+          "errors"
+        ],
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "userMessage",
+                "description",
+                "code",
+                "moreInfo"
+              ],
+              "properties": {
+                "userMessage": {
+                  "type": "string",
+                  "example": "Sorry, this is just an example for an error"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "For example: No customer found in the database"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "API34"
+                },
+                "moreInfo": {
+                  "type": "string",
+                  "example": "a link to the documentation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "link": {
+        "type": "string",
+        "example": "https:www.xyz.com"
+      },
+      "objectScope": {
+        "description": "Describes a objectScope resource",
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/objectScopeId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/objectScopeName"
+          },
+          "createdTimestamp": {
+            "$ref": "#/components/schemas/createdTimestamp"
+          },
+          "lastUpdatedTimestamp": {
+            "$ref": "#/components/schemas/lastUpdatedTimestamp"
+          },
+          "lastUpdatedBy": {
+            "$ref": "#/components/schemas/lastUpdatedBy"
+          }
+        }
+      },
+      "objectScopeListItem": {
+        "description": "Describes an objectScope resource",
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/objectScopeId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/objectScopeName"
+          },
+          "lastUpdatedTimestamp": {
+            "$ref": "#/components/schemas/lastUpdatedTimestamp"
+          }
+        }
+      },
+      "subscription": {
+        "description": "Describes a subscription resource",
+        "type": "object",
+        "required": [
+          "id",
+          "authorization",
+          "callbackURI",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/subscriptionId"
+          },
+          "authorization": {
+            "$ref": "#/components/schemas/authorization"
+          },
+          "callbackURI": {
+            "$ref": "#/components/schemas/callbackURI"
+          },
+          "status": {
+            "$ref": "#/components/schemas/subscriptionStatus"
+          },
+          "createdTimestamp": {
+            "$ref": "#/components/schemas/createdTimestamp"
+          },
+          "lastUpdatedTimestamp": {
+            "$ref": "#/components/schemas/lastUpdatedTimestamp"
+          },
+          "lastUpdatedBy": {
+            "$ref": "#/components/schemas/lastUpdatedBy"
+          }
+        }
+      },
+      "object": {
+        "description": "Describes a farm object resource",
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "make",
+          "type",
+          "model",
+          "pin"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/objectId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/objectName"
+          },
+          "make": {
+            "$ref": "#/components/schemas/objectMake"
+          },
+          "type": {
+            "$ref": "#/components/schemas/objectType"
+          },
+          "model": {
+            "$ref": "#/components/schemas/objectModel"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/pin"
+          },
+          "createdTimestamp": {
+            "$ref": "#/components/schemas/createdTimestamp"
+          },
+          "lastUpdatedTimestamp": {
+            "$ref": "#/components/schemas/lastUpdatedTimestamp"
+          },
+          "lastUpdatedBy": {
+            "$ref": "#/components/schemas/lastUpdatedBy"
+          }
+        }
+      },
+      "objectListItem": {
+        "description": "Describes a farm object resource",
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/objectId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/objectName"
+          },
+          "lastUpdatedTimestamp": {
+            "$ref": "#/components/schemas/lastUpdatedTimestamp"
+          }
+        }
+      },
+      "objectMake": {
+        "type": "string",
+        "example": "CLAAS",
+        "maxLength": 256,
+        "description": "The consuming side may not be able to store the received value at its full length and is allowed to truncate it."
+      },
+      "objectType": {
+        "type": "string",
+        "enum": ["TRACTOR", "COMBINE", "HARVESTER"],
+        "example": "COMBINE"
+      },
+      "objectModel": {
+        "type": "string",
+        "example": "LEXION",
+        "maxLength": 256,
+        "description": "The consuming side may not be able to store the received value at its full length and is allowed to truncate it."
+      },
+      "putMeasurements": {
+        "type": "object",
+        "required": [
+          "correlationId",
+          "messageCounter",
+          "subscriptionId",
+          "objectScopeId",
+          "object"
+        ],
+        "properties": {
+          "correlationId": {
+            "$ref": "#/components/schemas/correlationId"
+          },
+          "messageCounter": {
+                  "$ref": "#/components/schemas/messageCounter"
+                },
+          "subscriptionId": {
+            "$ref": "#/components/schemas/subscriptionId"
+          },
+          "objectScopeId": {
+            "$ref": "#/components/schemas/objectScopeId"
+          },
+          "object": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "objectId",
+                "measurements"
+              ],
+              "properties": {
+                "objectId": {
+                  "$ref": "#/components/schemas/objectId"
+                },
+                "measurements": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/measurement"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "postObjectScopesByIdSubscriptions": {
+        "type": "object",
+        "required": [
+          "callbackURI"
+        ],
+        "properties": {
+          "callbackURI": {
+            "$ref": "#/components/schemas/callbackURI"
+          },
+          "authorization": {
+            "$ref": "#/components/schemas/authorization"
+          }
+        }
+      },
+      "putObjectScopesByIdSubscriptionsById": {
+        "type": "object",
+        "required": [
+          "callbackURI",
+          "authorization",
+          "status"
+        ],
+        "properties": {
+          "callbackURI": {
+            "$ref": "#/components/schemas/callbackURI"
+          },
+          "authorization": {
+            "$ref": "#/components/schemas/authorization"
+          },
+          "status": {
+            "$ref": "#/components/schemas/subscriptionStatus"
+          }
+        }
+      },
+      "patchObjectScopesByIdSubscriptionsById": {
+        "type": "object",
+        "properties": {
+          "callbackURI": {
+            "$ref": "#/components/schemas/callbackURI"
+          },
+          "authorization": {
+            "$ref": "#/components/schemas/authorization"
+          },
+          "status": {
+            "$ref": "#/components/schemas/subscriptionStatus"
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "postObjectScopesByIdSubscriptions": {
+        "description": "The subscription to create.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/postObjectScopesByIdSubscriptions"
+            }
+          }
+        }
+      },
+      "putObjectScopesByIdSubscriptionsById": {
+        "description": "The subscription to update.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/putObjectScopesByIdSubscriptionsById"
+            }
+          }
+        }
+      },
+      "patchObjectScopesByIdSubscriptionsById": {
+        "description": "The subscription to update.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/patchObjectScopesByIdSubscriptionsById"
+            }
+          }
+        }
+      },
+      "putMeasurements": {
+        "description": "The measurements",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/putMeasurements"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "objectScopeId": {
+        "name": "objectScopeId",
+        "in": "path",
+        "description": "Unique identifier of the objects scope",
+        "schema": {
+          "$ref": "#/components/schemas/objectScopeId"
+        },
+        "required": true
+      },
+      "subscriptionId": {
+        "name": "subscriptionId",
+        "in": "path",
+        "description": "Unique identifier of a subscription",
+        "schema": {
+          "$ref": "#/components/schemas/subscriptionId"
+        },
+        "required": true
+      },
+      "callbackURI": {
+        "name": "callbackURI",
+        "in": "query",
+        "description": "Unique URI",
+        "schema": {
+          "$ref": "#/components/schemas/callbackURI"
+        },
+        "required": true
+      },
+      "objectId": {
+        "name": "objectId",
+        "in": "path",
+        "description": "Unique identifier of an object",
+        "schema": {
+          "$ref": "#/components/schemas/objectId"
+        },
+        "required": true
+      },
+      "authorization": {
+        "name": "authorization",
+        "in": "header",
+        "description": "The authorization token signing the call",
+        "schema": {
+          "$ref": "#/components/schemas/authorization"
+        }
+      },
+      "dateStart": {
+        "name": "dateStart",
+        "in": "query",
+        "description": "Point in time",
+        "schema": {
+          "$ref": "#/components/schemas/dateStart"
+        },
+        "required": true
+      },
+      "dateEnd": {
+        "name": "dateEnd",
+        "in": "query",
+        "description": "Point in time",
+        "schema": {
+          "$ref": "#/components/schemas/dateEnd"
+        },
+        "required": true
+      }
+    }
+  }
+}
