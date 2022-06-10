@@ -1,8 +1,7 @@
-# machine_tracking
+# machine_tracking \[v0.1.1\]
 
-[OpenAPI Specifications](https://sensorsystems.iais.fraunhofer.de/doc/?url=https://raw.githubusercontent.com/atlasH2020-templates/machine_tracking/wip0.1.1/oas)  
+[Documentation](https://github.com/atlasH2020-templates/machine_tracking/blob/v0.1.1/doc.pdf)
 
-machine_tracking services enable a consuming instance to subscribe to data transportation information for a specific set of machines.
-The data model of the transported information is currently designed for a minimum set of information for tracking of specific machines and can be found in the OpenAPI secifications.
+[OpenAPI Specifications](https://sensorsystems.iais.fraunhofer.de/doc/?url=https://raw.githubusercontent.com/atlasH2020-templates/machine_tracking/v0.1.1/oas)  
 
-In addition, the machine_tracking Service Template provides the means to retrieve historic data.
+LEGACY TEMPLATE. NEED RE-WORK.
