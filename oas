@@ -3,7 +3,7 @@
   "info": {
     "title": "UC#1 - Machine Tracking",
     "description": "This API describes services enabling client applications to create and maintain subscriptions for retrieving object data (e.g. position, speed, ...).",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "servers": [
     {
